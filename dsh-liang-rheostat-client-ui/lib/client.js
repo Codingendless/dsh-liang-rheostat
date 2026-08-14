@@ -6,14 +6,14 @@
  * 只 require 平台 seed word("react" / "react/jsx-runtime"),无跨包 import。
  *
  * 功能:
- * 1. 启动时从同源 `/liang-prices.json` 拉取服务端同步的官网价目表(峰谷分段),
+ * 1. 启动时从同源 `/liang-prices.json` 拉取服务端同步的官网价目表(峰谷分段)与评分参数,
  *    失败回落内置兜底表——客户端显示与服务端 /liang 一致;
  * 2. 订阅 connection 的 envelope 流,对每个命中目标的 assistant/message 事件
  *    (带 usage)按事件时间(峰谷分段)折算费用并用同款引擎评级,写入不可变快照 store;
- * 3. 向 `conversation.chat.assistant-actions` list 槽注册条目,在每条回复的
+ * 3. **历史回填**:会话被订阅/打开时,用 `session.history` 分页拉取历史事件重算评级,
+ *    重新打开的历史对话同样显示评级小字条;
+ * 4. 向 `conversation.chat.assistant-actions` list 槽注册条目,在每条回复的
  *    action 行渲染一行评级(货币符号按价目条目)。
- *
- * 注意:仅覆盖页面加载后新到达的事件(历史消息的评级在 /liang 与日志里)。
  */
 window.__ModuleLoader__.load({
 	id: "dsh-liang-rheostat-client-ui",
@@ -304,34 +304,74 @@ window.__ModuleLoader__.load({
 			} catch {
 				/* 保持内置兜底。 */
 			}
+			/** 给一个事件算评级并写入 store(实时与历史回填共用)。 */
+			const rateEvent = (sessionId, event) => {
+				if (event === null || typeof event !== "object" || event.type !== "assistant/message") return;
+				const data = event.data ?? {};
+				const usage = data.usage;
+				if (usage === void 0) return;
+				const messageId = data.message?.id;
+				if (messageId === void 0) return;
+				const source = data.message?.source ?? {};
+				if (!isTarget(source.provider, source.model)) return;
+				const time = typeof event.time === "number" ? event.time : Date.now();
+				const entry = resolvePrice(source.model, priceState.entries, priceState.defaultPrice);
+				const metrics = scoreCall(usage, entry, priceState.options, time);
+				const rank = rankOf(metrics, priceState.options);
+				store.set(sessionId, messageId, Object.freeze({
+					rank,
+					output: metrics.output,
+					cacheRate: metrics.cacheRate,
+					cost: metrics.cost,
+					score: metrics.score,
+					currency: entry.currency ?? priceState.currency
+				}));
+			};
+			// 历史回填:会话打开/订阅时,用 session.history 分页拉取历史事件重算评级,
+			// 让重开的历史对话也能显示评级小字条(store 键幂等,与实时事件不冲突)。
+			const backfilled = new Set();
+			const backfilling = new Set();
+			const backfillSession = async (sessionId) => {
+				if (backfilled.has(sessionId) || backfilling.has(sessionId)) return;
+				backfilling.add(sessionId);
+				try {
+					const api = ctx.get("connection")?.api;
+					if (api === void 0 || typeof api?.sessions?.history !== "function") return;
+					let beforeSeq = void 0;
+					for (let page = 0; page < 100; page++) {
+						const { result } = await api.sessions.history({ sessionId, beforeSeq, maxMessages: 200 });
+						if (result === null || typeof result !== "object" || result.ok !== true) break;
+						const events = result.value?.events;
+						if (!Array.isArray(events) || events.length === 0) break;
+						for (const { event } of events) rateEvent(sessionId, event);
+						if (result.value?.hasMore !== true) break;
+						beforeSeq = events[0]?.event?.seq;
+						if (beforeSeq === void 0) break;
+					}
+				} catch {
+					/* 回填失败不影响实时评级。 */
+				} finally {
+					backfilling.delete(sessionId);
+					backfilled.add(sessionId);
+				}
+			};
 			let unsubscribe = () => {};
 			try {
 				const connection = ctx.get("connection");
 				unsubscribe = connection.api.subscribeEnvelopes((batch) => {
 					for (const envelope of batch) {
 						const frame = envelope === null || typeof envelope !== "object" ? void 0 : envelope.payload;
-						if (frame === void 0 || frame.type !== "session/event") continue;
-						const event = frame.event;
-						if (event === null || typeof event !== "object" || event.type !== "assistant/message") continue;
-						const data = event.data ?? {};
-						const usage = data.usage;
-						if (usage === void 0) continue;
-						const messageId = data.message?.id;
-						if (messageId === void 0) continue;
-						const source = data.message?.source ?? {};
-						if (!isTarget(source.provider, source.model)) continue;
-						const time = typeof event.time === "number" ? event.time : Date.now();
-						const entry = resolvePrice(source.model, priceState.entries, priceState.defaultPrice);
-						const metrics = scoreCall(usage, entry, priceState.options, time);
-						const rank = rankOf(metrics, priceState.options);
-						store.set(frame.sessionId, messageId, Object.freeze({
-							rank,
-							output: metrics.output,
-							cacheRate: metrics.cacheRate,
-							cost: metrics.cost,
-							score: metrics.score,
-							currency: entry.currency ?? priceState.currency
-						}));
+						if (frame === void 0 || typeof frame !== "object") continue;
+						// 会话被订阅/打开 → 回填历史评级;会话事件流里出现某会话也兜底触发一次。
+						if (frame.type === "session/subscribed") {
+							if (typeof frame.sessionId === "string") backfillSession(frame.sessionId);
+							continue;
+						}
+						if (frame.type !== "session/event") continue;
+						if (typeof frame.sessionId === "string" && !backfilled.has(frame.sessionId) && !backfilling.has(frame.sessionId)) {
+							backfillSession(frame.sessionId);
+						}
+						rateEvent(frame.sessionId, frame.event);
 					}
 				});
 			} catch (error) {

@@ -45,21 +45,25 @@ DeepSeek API 响应 → session/event(assistant/message + usage)
    · 按事件时间解析价目条目(峰谷分段:高峰/空闲)
    · 用与服务端相同的 scoreCall/rankOf 打分评级
 3. 写入不可变快照 store(以 sessionId:messageId 为键)
-4. 注册进 conversation.chat.assistant-actions 槽(list 槽,可叠加)
+4. 历史回填:会话被订阅/打开时,用 session.history 分页拉取历史事件重算评级
+   → 重新打开的历史对话同样显示评级小字条
+5. 注册进 conversation.chat.assistant-actions 槽(list 槽,可叠加)
    → 每条回复的 action 行渲染评级小字条
 ```
 
-- **价目表**:启动时 `fetch("/liang-prices.json")`(服务端插件的同源端点);失败回落内置兜底表
+- **价目表**:启动时 `fetch("/liang-prices.json")`(服务端插件的同源端点,含评分参数);失败回落内置兜底表
   (deepseek-v4-flash / v4-pro 官网快照,含峰谷分段);
 - **槽位**:`conversation.chat.assistant-actions` 是 list 槽,与 message-feedback 等条目并存,
   不遮蔽任何现有 UI;
-- **边界**:只对页面加载后**新到达**的回复显示(历史消息的评级仍在 `/liang` 与日志里)。
+- **历史回填**:长会话首次打开时按页拉取(每页最多 200 个事件),评级会稍晚几百毫秒出现,属正常;
+  回填失败不影响实时评级。
 
 ## 文件
 
 - `lib/client.js` — 浏览器 bundle(手写 UMD 工厂格式,仅依赖 `react` / `react/jsx-runtime` 平台 seed);
 - `lib/index.js` — 服务端空半边(空 apply,仅让 loader 识别本包);
-- `test/verify-client-bundle.mjs` — 自检:bundle 工厂执行、引擎公式与服务端对拍、真实会话数据跑分。
+- `test/verify-client-bundle.mjs` — 自检:bundle 工厂执行、引擎公式与服务端对拍、真实会话数据跑分;
+- `test/runtime-smoke.mjs` — 运行时冒烟:mock ctx 执行 apply,验证订阅/槽注册/历史回填触发。
 
 ## 开发与测试
 
