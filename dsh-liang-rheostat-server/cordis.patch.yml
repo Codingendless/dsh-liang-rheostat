@@ -1,0 +1,62 @@
+# dsh-liang-rheostat bundle patch — 向 profile 根插入一行。
+# 该行在 profile 的 bundle 层之后、用户 cordis.patch.yml 之前生效;
+# 用户可用 id 为 `liang-rheostat` 的 update 覆盖任意配置(最后写入者胜)。
+- insert:
+    - id: liang-rheostat
+      name: 'dsh-liang-rheostat-server'
+      config:
+        # 只对 DeepSeek 本身平台的 provider 生效(默认 deepseek-official)。
+        enabled: true
+        providers:
+          - 'deepseek-official'
+        # 模型通配符,'*' 任意匹配。
+        modelPatterns:
+          - 'deepseek-*'
+        # 滑动窗口:最近 N 次调用决定滑阻方向。
+        windowSize: 12
+        # 初始 / 上下限 dial(输出预算系数)。
+        initialDial: 0.6
+        minDial: 0.25
+        maxDial: 1
+        # 通用 max_tokens 基准(价目表里模型自带的 maxTokens 优先)。
+        baseMaxTokens: 131072
+        # 「小」:输出低于 tinyOutputTokens 且费用低于 tinyCostCap -> 小南梁(单位随同步货币,默认人民币)。
+        tinyOutputTokens: 200
+        tinyCostCap: 0.007
+        # 「牢」:费用超 expensiveThreshold 且输出低于 wasteOutputTokens -> 牢梁(单位随同步货币)。
+        wasteOutputTokens: 400
+        expensiveThreshold: 0.035
+        # 费用压力参考:每千输出 token 的费用;"auto" = 该模型输出单价/1000(随同步价缩放)。
+        referenceCostPerKOutput: auto
+        # 兜底单价(每百万 token,人民币;未知模型回落)。
+        defaultPrice:
+          inputPerM: 1
+          cacheReadPerM: 0.02
+          cacheWritePerM: 1
+          outputPerM: 2
+          currency: CNY
+        # 按模型的价目表:精确 id 优先,其次最长前缀;官网同步表优先于此处同 id 条目。
+        # 当前官网只列 deepseek-v4-flash / deepseek-v4-pro,其余模型回落 defaultPrice。
+        prices: []
+        # 官网价格自动同步(峰谷分段计价;默认中文官方定价页,人民币计价;失败自动回落内置表,`/liang sync` 可强制)。
+        sync:
+          enabled: true
+          url: 'https://api-docs.deepseek.com/zh-cn/quick_start/pricing/'
+          intervalHours: 24
+          timeoutMs: 15000
+          overrides: {}
+        # 各档评级的最低分数(0-100)。
+        tiers:
+          liangzu: 85
+          liangshen: 70
+          liangsheng: 55
+          liangzi: 35
+          laoliang: 18
+        logEveryCall: true
+
+# Browser UI: assistant-message rating badge (dsh.client package; node half is a no-op).
+# Mounted as a cordis row so client-modules scans package.json dsh.client into __DSH_BOOT__.
+- insert:
+    - id: dsh-liang-rheostat-client-ui
+      name: 'dsh-liang-rheostat-client-ui'
+

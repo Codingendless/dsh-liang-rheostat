@@ -1,0 +1,43 @@
+{
+  "name": "dsh-liang-rheostat-server",
+  "version": "0.1.0",
+  "description": "DeepSeek 梁表 · 滑动变阻器:按 token 输出/缓存率/费用自动评级(梁祖/梁神/梁圣/梁子/牢梁/小南梁)并自动调节 max_tokens 输出预算的 DSH 插件",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Codingendless/dsh-liang-rheostat.git",
+    "directory": "dsh-liang-rheostat-server"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./engine": "./lib/engine.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "deepseek",
+    "plugin",
+    "liang",
+    "rheostat",
+    "token-meter",
+    "dsh-plugin"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
