@@ -103,7 +103,7 @@ check("评级:梁祖 / 梁圣 / 梁子", () => {
 	assert.equal(rankOf(mid, OPTIONS), "liangzi");
 });
 
-check("评级:牢梁(又贵又拉)与 小南梁(微小便宜)", () => {
+check("评级:牢梁(又贵又拉)与 小难梁(微小便宜)", () => {
 	const jail = scoreCall(usage({ input: 200000, read: 0, output: 300 }), DEFAULT_PRICE, OPTIONS);
 	assert.ok(jail.cost > OPTIONS.expensiveThreshold);
 	assert.equal(rankOf(jail, OPTIONS), "laoliang");

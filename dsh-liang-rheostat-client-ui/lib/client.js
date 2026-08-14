@@ -31,7 +31,7 @@ window.__ModuleLoader__.load({
 			liangsheng: "⛩️ 梁圣",
 			liangzi: "🙂 梁子",
 			laoliang: "🚔 牢梁",
-			xiaonanliang: "🌱 小南梁"
+			xiaonanliang: "🌱 小难梁"
 		});
 		function clamp(value, lo, hi) {
 			return Math.min(hi, Math.max(lo, value));
@@ -144,7 +144,7 @@ window.__ModuleLoader__.load({
 				score: clamp(score, 0, 100)
 			};
 		}
-		/** 硬规则优先:又贵又拉 → 牢梁;微小且便宜 → 小南梁;其余按分数阈值。 */
+		/** 硬规则优先:又贵又拉 → 牢梁;微小且便宜 → 小难梁;其余按分数阈值。 */
 		function rankOf(metrics, options) {
 			if (metrics.cost > options.expensiveThreshold && metrics.output < options.wasteOutputTokens) return "laoliang";
 			if (metrics.output < options.tinyOutputTokens && metrics.cost < options.tinyCostCap) return "xiaonanliang";

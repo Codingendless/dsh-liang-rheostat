@@ -20,7 +20,7 @@
         maxDial: 1
         # 通用 max_tokens 基准(价目表里模型自带的 maxTokens 优先)。
         baseMaxTokens: 131072
-        # 「小」:输出低于 tinyOutputTokens 且费用低于 tinyCostCap -> 小南梁(单位随同步货币,默认人民币)。
+        # 「小」:输出低于 tinyOutputTokens 且费用低于 tinyCostCap -> 小难梁(单位随同步货币,默认人民币)。
         tinyOutputTokens: 200
         tinyCostCap: 0.007
         # 「牢」:费用超 expensiveThreshold 且输出低于 wasteOutputTokens -> 牢梁(单位随同步货币)。

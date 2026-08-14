@@ -1,6 +1,6 @@
 {
   "name": "dsh-liang-rheostat-client-ui",
-  "description": "DeepSeek 梁表 · 滑动变阻器 — 浏览器半边:每条模型回复的回合尾部显示一行评级(梁祖/梁神/梁圣/梁子/牢梁/小南梁),数据来自会话事件里的 usage,与服务端 dsh-liang-rheostat-server 同款评分引擎",
+  "description": "DeepSeek 梁表 · 滑动变阻器 — 浏览器半边:每条模型回复的回合尾部显示一行评级(梁祖/梁神/梁圣/梁子/牢梁/小难梁),数据来自会话事件里的 usage,与服务端 dsh-liang-rheostat-server 同款评分引擎",
   "version": "0.1.0",
   "repository": {
     "type": "git",

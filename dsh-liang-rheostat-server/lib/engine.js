@@ -10,7 +10,7 @@
  *   liangsheng     梁圣 ⛩️  圣质如初,稳中向好
  *   liangzi        梁子 🙂  平平无奇,正常发挥
  *   laoliang       牢梁 🚔  被关起来了,又贵又拉
- *   xiaonanliang   小南梁 🌱 小卡拉米,一句废话式输出
+ *   xiaonanliang   小难梁 🌱 小卡拉米,一句废话式输出
  *
  * @module dsh-liang-rheostat/engine
  */
@@ -35,7 +35,7 @@ export const TIER_LABELS = Object.freeze({
 	liangsheng: "⛩️ 梁圣",
 	liangzi: "🙂 梁子",
 	laoliang: "🚔 牢梁",
-	xiaonanliang: "🌱 小南梁"
+	xiaonanliang: "🌱 小难梁"
 });
 
 /** 把值夹在 [lo, hi] 之间。 */
@@ -216,7 +216,7 @@ export function scoreCall(usage, price, options, time = Date.now()) {
 
 /**
  * 由评分结果映射到六档评级。
- * 硬规则优先:又贵又拉 -> 牢梁;微小且便宜 -> 小南梁;其余按分数阈值。
+ * 硬规则优先:又贵又拉 -> 牢梁;微小且便宜 -> 小难梁;其余按分数阈值。
  * @param {object} metrics scoreCall 的返回
  * @param {object} options { tinyOutputTokens, tinyCostCap, wasteOutputTokens, expensiveThreshold, tiers }
  * @returns {string} TIER_ORDER 之一

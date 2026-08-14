@@ -119,7 +119,7 @@ describe("评分与评级", () => {
 		assert.ok(metrics.cost > OPTIONS.expensiveThreshold);
 		assert.equal(rankOf(metrics, OPTIONS), "laoliang");
 	});
-	it("微小且便宜 -> 小南梁(硬规则优先)", () => {
+	it("微小且便宜 -> 小难梁(硬规则优先)", () => {
 		const metrics = scoreCall(usage({ input: 100, read: 0, output: 50 }), DEFAULT_PRICE, OPTIONS);
 		assert.equal(rankOf(metrics, OPTIONS), "xiaonanliang");
 	});

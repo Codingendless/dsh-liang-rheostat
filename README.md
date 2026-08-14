@@ -1,7 +1,7 @@
 # dsh-liang-rheostat — DeepSeek 梁表 · 滑动变阻器
 
 > **DSH 插件** · 为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 打造。
-> 按 token 输出 / 缓存命中率 / 费用给每次调用打评级(互联网讲法:梁祖 / 梁神 / 梁圣 / 梁子 / 牢梁 / 小南梁),
+> 按 token 输出 / 缓存命中率 / 费用给每次调用打评级(互联网讲法:梁祖 / 梁神 / 梁圣 / 梁子 / 牢梁 / 小难梁),
 > 并像**滑动变阻器**一样自动调节 `max_tokens` 输出预算;价格**自动同步 DeepSeek 官网**,支持**峰谷分段计价**。
 
 **仓库**:<https://github.com/Codingendless/dsh-liang-rheostat> · 话题:`dsh-plugin`
@@ -32,7 +32,7 @@ dsh plugin --profile web add /path/to/dsh-liang-rheostat/dsh-liang-rheostat-clie
 
 ## 特性一览
 
-- **六档评级**:👑 梁祖 / 🛐 梁神 / ⛩️ 梁圣 / 🙂 梁子 / 🚔 牢梁 / 🌱 小南梁,阈值可配;
+- **六档评级**:👑 梁祖 / 🛐 梁神 / ⛩️ 梁圣 / 🙂 梁子 / 🚔 牢梁 / 🌱 小难梁,阈值可配;
 - **滑动变阻器**:按评级拉动 dial(输出预算系数),动态调节 `max_tokens`,夹在 `[minDial, maxDial]`;
 - **官网价格自动同步**:启动 + 每 24h 抓取 DeepSeek 官方定价页,解析失败自动回落内置价目表;
 - **峰谷分段计价**:按官网时段(高峰 / 空闲,空闲半价)与**调用发生时间**取价,生效日期自动切换;

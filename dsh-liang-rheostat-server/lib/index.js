@@ -4,7 +4,7 @@
  * 只对 DeepSeek 本身平台(默认 provider `deepseek-official`)的模型生效:
  * 1. 计量 —— 监听 `session/event`,对每次带 usage 的模型调用折算
  *    输出 token、缓存命中率、美元费用,并打出互联网讲法的评级
- *    (梁祖/梁神/梁圣/梁子/牢梁/小南梁,称谓可配置)。
+ *    (梁祖/梁神/梁圣/梁子/牢梁/小难梁,称谓可配置)。
  * 2. 滑动变阻器 —— 维护一根 dial(输出预算系数),按近期窗口表现自动滑动:
  *    表现好(dial 上升)放宽 max_tokens,又贵又拉则收紧,像滑动变阻器一样
  *    自动调节回路的「阻力」。调节点在 `agent/request` waterfall 上,
@@ -98,7 +98,7 @@ const Config = z.object({
 	baseMaxTokens: z.number().step(1).min(256).default(131072),
 	/** 「小」的判定:输出低于该 token 数视为微小输出。 */
 	tinyOutputTokens: z.number().step(1).min(1).default(200),
-	/** 微小输出且费用低于该值 -> 小南梁(单位随同步货币,默认人民币)。 */
+	/** 微小输出且费用低于该值 -> 小难梁(单位随同步货币,默认人民币)。 */
 	tinyCostCap: z.number().min(0).default(0.007),
 	/** 「又贵又拉」的输出上限:费用超阈值且输出低于该值 -> 牢梁。 */
 	wasteOutputTokens: z.number().step(1).min(1).default(400),
