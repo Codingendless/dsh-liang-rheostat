@@ -52,4 +52,4 @@ dsh plugin --profile web add /path/to/dsh-liang-rheostat/dsh-liang-rheostat-clie
 
 ## 许可证
 
-[MIT](./dsh-liang-rheostat-server/LICENSE) · SPDX: `MIT`
+[MIT](./LICENSE) · SPDX: `MIT`
