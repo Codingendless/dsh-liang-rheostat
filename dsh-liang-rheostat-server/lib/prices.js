@@ -75,8 +75,7 @@ function captureNumbers(text, from = 0) {
 	const numbers = [];
 	const re = /-?\d+(?:\.\d+)?/g;
 	re.lastIndex = from;
-	let match;
-	while ((match = re.exec(text)) !== null) numbers.push(Number(match[0]));
+	for (const match of text.matchAll(re)) numbers.push(Number(match[0]));
 	return numbers;
 }
 
@@ -86,14 +85,14 @@ const MONTH_INDEX = Object.freeze({
 	july: 6, august: 7, september: 8, october: 9, november: 10, december: 11
 });
 export function parseEffectiveAt(text) {
-	const en = /take effect at\s+(\d{1,2}):(\d{2})\s*UTC\s+on\s+([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/i.exec(text);
+	const en = text.match(/take effect at\s+(\d{1,2}):(\d{2})\s*UTC\s+on\s+([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/i);
 	if (en !== null) {
 		const month = MONTH_INDEX[en[3].toLowerCase()];
 		if (month !== void 0) {
 			return Date.UTC(Number(en[5]), month, Number(en[4]), Number(en[1]), Number(en[2]));
 		}
 	}
-	const zh = /北京时间\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*(\d{1,2}):(\d{2})/.exec(text);
+	const zh = text.match(/北京时间\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*(\d{1,2}):(\d{2})/);
 	if (zh !== null) {
 		// 北京时间 = UTC+8 → 转 UTC
 		return Date.UTC(Number(zh[1]), Number(zh[2]) - 1, Number(zh[3]), Number(zh[4]), Number(zh[5])) - 8 * 3600 * 1000;
@@ -116,8 +115,7 @@ export function parsePricingPage(html) {
 	// 1) 峰谷分段表(表 B):模型 + 空闲/高峰 各三列数字(容忍 $ 前缀与 元 后缀)
 	const segmentRows = [];
 	const segmentRe = /(deepseek-[a-z0-9-]+)\s+(OFF-PEAK|空闲时段)\s+\$?(\d+(?:\.\d+)?)\s*元?\s+\$?(\d+(?:\.\d+)?)\s*元?\s+\$?(\d+(?:\.\d+)?)\s*元?\s+(PEAK|高峰时段)\s+\$?(\d+(?:\.\d+)?)\s*元?\s+\$?(\d+(?:\.\d+)?)\s*元?\s+\$?(\d+(?:\.\d+)?)\s*元?/g;
-	let segmentMatch;
-	while ((segmentMatch = segmentRe.exec(text)) !== null) {
+	for (const segmentMatch of text.matchAll(segmentRe)) {
 		segmentRows.push({
 			id: segmentMatch[1],
 			offPeak: {
@@ -153,7 +151,7 @@ export function parsePricingPage(html) {
 		[/1M OUTPUT TOKENS|百万tokens输出/, "outputPerM"]
 	];
 	for (const [re, key] of flatPatterns) {
-		const match = re.exec(text);
+		const match = text.match(re);
 		if (match === null) continue;
 		// 该指标行后面的前 modelOrder.length 个数字即各模型该指标的价格
 		const numbers = captureNumbers(text, match.index + match[0].length).slice(0, modelOrder.length);

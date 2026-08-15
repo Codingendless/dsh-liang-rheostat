@@ -527,7 +527,7 @@ var LiangRheostatService = (() => {
 					text: this.renderStatus()
 				};
 			}
-			const manual = /^dial\s+(\d+(?:\.\d+)?)$/.exec(input);
+			const manual = input.match(/^dial\s+(\d+(?:\.\d+)?)$/);
 			if (manual) {
 				const value = clamp(Number(manual[1]), this.config.minDial, this.config.maxDial);
 				this.setDial(value);
